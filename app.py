@@ -16,7 +16,7 @@ import threading
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
-MODEL_PATH = r"C:\Users\acer\OneDrive\Desktop\re\Models\ResNet50Deepfake_best.pth"
+MODEL_PATH = r"Models\ResNet50Deepfake_best.pth"
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
