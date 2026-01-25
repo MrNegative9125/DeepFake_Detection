@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veritas-Video - Deepfake Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: #0a0e14;
+            color: #e4e7eb;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 200px;
+            background: #151a23;
+            border-right: 1px solid #1f2937;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 20px 30px 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            margin: 2px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .nav-item:hover {
+            background: #1f2937;
+            color: #e4e7eb;
+        }
+
+        .nav-item.active {
+            background: #10b981;
+            color: white;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: #151a23;
+            border-bottom: 1px solid #1f2937;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .case-id {
+            font-size: 24px;
+            font-weight: 600;
+            color: #e4e7eb;
+        }
+
+        .status-badge {
+            background: #065f46;
+            color: #10b981;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .notification-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #1f2937;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .notification-btn:hover {
+            background: #374151;
+            color: #e4e7eb;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .video-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Video Player */
+        .video-container {
+            background: #151a23;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #1f2937;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #videoPlayer {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: #6b7280;
+        }
+
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #10b981;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #9ca3af;
+        }
+
+        .upload-subtext {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* Video Controls */
+        .video-controls {
+            background: #0f1419;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 5px;
+        }
+
+        .control-btn:hover {
+            color: #e4e7eb;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #374151;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ef4444;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .time-display {
+            font-size: 13px;
+            color: #9ca3af;
+            font-family: 'Courier New', monospace;
+        }
+
+        .quality-selector {
+            background: #1f2937;
+            border: none;
+            color: #9ca3af;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        /* File Metadata */
+        .metadata-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .metadata-card {
+            background: #151a23;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .metadata-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        .metadata-item {
+            margin-bottom: 12px;
+        }
+
+        .metadata-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .metadata-value {
+            font-size: 14px;
+            color: #e4e7eb;
+            font-weight: 500;
+        }
+
+        .upload-zone {
+            background: #0f1419;
+            border: 2px dashed #374151;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .upload-zone:hover {
+            border-color: #10b981;
+            background: #151a23;
+        }
+
+        .upload-zone.dragover {
+            border-color: #10b981;
+            background: #065f46;
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Probability Gauge */
+        .probability-card {
+            background: #151a23;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px auto;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: #1f2937;
+            stroke-width: 20;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 20;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .gauge-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-percentage {
+            font-size: 42px;
+            font-weight: 700;
+            color: #e4e7eb;
+        }
+
+        .gauge-label {
+            font-size: 12px;
+            color: #ef4444;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
+        }
+
+        .detection-info {
+            font-size: 13px;
+            color: #9ca3af;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .detection-method {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        /* Report Button */
+        .report-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .report-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        .warning-box {
+            background: #422006;
+            border: 1px solid #78350f;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .warning-icon {
+            color: #f59e0b;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .warning-text {
+            font-size: 12px;
+            color: #fbbf24;
+            line-height: 1.5;
+        }
+
+        /* Flagged Frames */
+        .frames-card {
+            background: #151a23;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .frames-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .frames-count {
+            background: #7f1d1d;
+            color: #ef4444;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .export-btn {
+            background: none;
+            border: 1px solid #374151;
+            color: #10b981;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .export-btn:hover {
+            background: #065f46;
+            border-color: #10b981;
+        }
+
+        .frames-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .frame-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px;
+            background: #0f1419;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .frame-item:hover {
+            background: #1f2937;
+            border-color: #374151;
+        }
+
+        .frame-thumbnail {
+            width: 80px;
+            height: 45px;
+            border-radius: 6px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .frame-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+        }
+
+        .frame-info {
+            flex: 1;
+        }
+
+        .frame-number {
+            font-size: 13px;
+            color: #e4e7eb;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .frame-time {
+            font-size: 11px;
+            color: #6b7280;
+            font-family: 'Courier New', monospace;
+        }
+
+        .frame-probability {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .probability-bar {
+            flex: 1;
+            height: 4px;
+            background: #1f2937;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .probability-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .probability-text {
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Camera Mode */
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: #9ca3af;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .mode-btn:hover {
+            background: #374151;
+            color: #e4e7eb;
+        }
+
+        .mode-btn.active {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding: 20px;
+            background: #0f1419;
+        }
+
+        .camera-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .start-capture {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .start-capture:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .stop-capture {
+            background: #374151;
+            color: #e4e7eb;
+        }
+
+        .stop-capture:hover {
+            background: #4b5563;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .capture-progress {
+            text-align: center;
+            padding: 15px;
+            background: #0f1419;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 8px;
+            background: #1f2937;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #1f2937;
+            border-top-color: #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* Hide elements */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f1419;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">✓</div>
+                <span>Veritas-Video</span>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active">
+                    <span class="nav-icon">■</span>
+                    <span>Dashboard</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <div class="case-id">Video Analysis / <span style="color: #6b7280;">Case #<span id="caseId">---</span></span></div>
+                    <div class="status-badge" id="statusBadge">Ready</div>
+                </div>
+                <div class="header-right">
+                    <button class="notification-btn">🔔</button>
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                        📤 New Upload
+                    </button>
+                    <input type="file" id="fileInput" accept="video/*" onchange="handleFileSelect(event)">
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Left Section -->
+                <div class="video-section">
+                    <!-- Mode Toggle -->
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" onclick="switchMode('upload')">📹 Upload Video</button>
+                        <button class="mode-btn" onclick="switchMode('camera')">📷 Live Camera</button>
+                    </div>
+
+                    <!-- Video Container -->
+                    <div class="video-container">
+                        <div class="video-wrapper" id="videoWrapper">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                                    <div class="upload-icon">⬆</div>
+                                    <div class="upload-text">Drag & drop to analyze another video</div>
+                                    <div class="upload-subtext">Supports MP4, AVI, MOV, MKV (Max 500MB)</div>
+                                </div>
+                            </div>
+                            <video id="videoPlayer" class="hidden" controls></video>
+                            <video id="cameraFeed" class="hidden" autoplay playsinline></video>
+                            <div class="loading" id="loadingSpinner">
+                                <div class="spinner"></div>
+                                <div class="loading-text">Analyzing video...</div>
+                            </div>
+                        </div>
+                        <div class="video-controls hidden" id="videoControls">
+                            <button class="control-btn" id="playPauseBtn" onclick="togglePlay()">▶</button>
+                            <button class="control-btn">⏭</button>
+                            <div class="progress-bar" id="progressBar" onclick="seekVideo(event)">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <span class="time-display"><span id="currentTime">00:00:00</span> / <span id="duration">00:00:00</span></span>
+                            <select class="quality-selector">
+                                <option>1080p</option>
+                            </select>
+                            <button class="control-btn" onclick="toggleMute()">🔊</button>
+                            <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
+                        </div>
+                        
+                        <!-- Camera Controls -->
+                        <div class="camera-controls hidden" id="cameraControls">
+                            <button class="camera-btn start-capture" id="startCaptureBtn" onclick="startCapture()">
+                                ⏺ Start Capture
+                            </button>
+                            <button class="camera-btn stop-capture hidden" id="stopCaptureBtn" onclick="stopCapture()">
+                                ⏹ Stop
+                            </button>
+                            <button class="camera-btn analyze-btn hidden" id="analyzeCameraBtn" onclick="analyzeCamera()">
+                                🔍 Analyze
+                            </button>
+                        </div>
+                        
+                        <!-- Capture Progress -->
+                        <div class="capture-progress hidden" id="captureProgress">
+                            <div class="progress-text">Capturing frames: <span id="framesCollected">0</span> / 300</div>
+                            <div class="progress-track">
+                                <div class="progress-bar-fill" id="captureProgressBar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata -->
+                    <div class="metadata-section">
+                        <div class="metadata-card">
+                            <div class="metadata-title">File Metadata</div>
+                            <div class="metadata-item">
+                                <div class="metadata-label">Resolution</div>
+                                <div class="metadata-value" id="resolution">-</div>
+                            </div>
+                            <div class="metadata-item">
+                                <div class="metadata-label">Frame Rate</div>
+                                <div class="metadata-value" id="frameRate">-</div>
+                            </div>
+                            <div class="metadata-item">
+                                <div class="metadata-label">Codec</div>
+                                <div class="metadata-value" id="codec">-</div>
+                            </div>
+                        </div>
+                        <div class="metadata-card" id="dragDropCard">
+                            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                                <div class="upload-icon" style="width: 60px; height: 60px; font-size: 24px; margin-bottom: 15px;">⬆</div>
+                                <div class="upload-text" style="font-size: 14px;">Drag & drop to analyze another video</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar -->
+                <div class="right-sidebar">
+                    <!-- Probability Card -->
+                    <div class="probability-card">
+                        <div class="card-title">Deepfake Probability</div>
+                        <div class="gauge-container">
+                            <svg class="gauge-svg" width="200" height="200" viewBox="0 0 200 200">
+                                <circle class="gauge-bg" cx="100" cy="100" r="80"></circle>
+                                <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="80" 
+                                        stroke="#10b981" 
+                                        stroke-dasharray="502.4" 
+                                        stroke-dashoffset="502.4"></circle>
+                            </svg>
+                            <div class="gauge-text">
+                                <div class="gauge-percentage" id="gaugePercentage">-</div>
+                                <div class="gauge-label" id="gaugeLabel">ANALYZING</div>
+                            </div>
+                        </div>
+                        <div class="detection-info" id="detectionInfo">
+                            Upload or capture a video to begin analysis
+                        </div>
+                        
+                        <!-- Report Button (High Confidence) -->
+                        <button class="report-btn hidden" id="reportBtn" onclick="reportToCybercrime()">
+                            ⚠️ Report to Cybercrime Portal
+                        </button>
+                        
+                        <!-- Warning (Low Confidence) -->
+                        <div class="warning-box hidden" id="warningBox">
+                            <div class="warning-icon">⚠️</div>
+                            <div class="warning-text">
+                                Low confidence detection. Results may not be conclusive. Consider getting a professional forensic analysis.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flagged Frames -->
+                    <div class="frames-card">
+                        <div class="frames-header">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="card-title" style="margin: 0;">Flagged Frames</div>
+                                <div class="frames-count" id="framesCount">0 Found</div>
+                            </div>
+                            <button class="export-btn" onclick="exportReport()">Export Report</button>
+                        </div>
+                        <div class="frames-list" id="framesList">
+                            <div style="text-align: center; padding: 40px 20px; color: #6b7280; font-size: 14px;">
+                                No frames analyzed yet
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'upload';
+        let cameraStream = null;
+        let captureInterval = null;
+        let framesCollected = 0;
+        let isCapturing = false;
+        let currentVideoBlob = null;
+        let flaggedFramesData = [];
+
+        // Drag and Drop
+        const dropZone = document.getElementById('dropZone');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            currentVideoBlob = file;
+            const caseId = Math.random().toString(36).substr(2, 9).toUpperCase();
+            document.getElementById('caseId').textContent = caseId;
+            document.getElementById('statusBadge').textContent = 'PROCESSING';
+            
+            document.getElementById('uploadArea').classList.add('hidden');
+            document.getElementById('loadingSpinner').classList.add('active');
+
+            const formData = new FormData();
+            formData.append('video', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').classList.remove('active');
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    resetUI();
+                    return;
+                }
+
+                // Show video player
+                const videoPlayer = document.getElementById('videoPlayer');
+                videoPlayer.src = URL.createObjectURL(file);
+                videoPlayer.classList.remove('hidden');
+                document.getElementById('videoControls').classList.remove('hidden');
+
+                displayResults(data);
+                document.getElementById('statusBadge').textContent = 'PROCESSING COMPLETE';
+                document.getElementById('statusBadge').style.background = '#065f46';
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').classList.remove('active');
+                alert('Error uploading video: ' + error);
+                resetUI();
+            });
+        }
+
+        function displayResults(data) {
+            flaggedFramesData = data;
+            
+            // Get the actual probability - use fake_probability from model
+            const fakeProbability = data.fake_probability * 100;
+            const realProbability = data.real_probability * 100;
+            
+            // Update gauge with fake probability
+            updateGauge(fakeProbability);
+            
+            // Determine if it's fake based on probability (>50% = fake)
+            const isFake = fakeProbability > 50;
+            const confidence = Math.max(fakeProbability, realProbability);
+            
+            // Update detection info based on actual probability ranges
+            let detectionText = '';
+            if (fakeProbability >= 70) {
+                detectionText = `The system has detected <strong>significant manipulation artifacts</strong> consistent with <span class="detection-method">GAN-based synthesis</span>.`;
+            } else if (fakeProbability >= 40 && fakeProbability < 70) {
+                detectionText = `The system has detected <strong>moderate manipulation indicators</strong>. Further analysis recommended.`;
+            } else {
+                detectionText = `The system has detected <strong>minimal manipulation artifacts</strong>. Content appears to be <span class="detection-method">authentic footage</span>.`;
+            }
+            document.getElementById('detectionInfo').innerHTML = detectionText;
+            
+            // Show report button or warning based on confidence
+            // High confidence fake (>=70%) -> Show report button
+            // Medium confidence fake (40-69%) -> Show warning
+            // Low fake probability (<40%) -> Hide both
+            if (fakeProbability >= 70) {
+                document.getElementById('reportBtn').classList.remove('hidden');
+                document.getElementById('warningBox').classList.add('hidden');
+            } else if (fakeProbability >= 40 && fakeProbability < 70) {
+                document.getElementById('warningBox').classList.remove('hidden');
+                document.getElementById('reportBtn').classList.add('hidden');
+            } else {
+                document.getElementById('reportBtn').classList.add('hidden');
+                document.getElementById('warningBox').classList.add('hidden');
+            }
+            
+            // Update metadata
+            document.getElementById('resolution').textContent = 'Processing...';
+            document.getElementById('frameRate').textContent = `${data.fps ? data.fps.toFixed(2) : '-'} FPS`;
+            document.getElementById('codec').textContent = 'H.264 (High Profile)';
+            
+            // Display flagged frames
+            displayFlaggedFrames(data);
+        }
+
+        function updateGauge(percentage) {
+            const circumference = 502.4;
+            const offset = circumference - (percentage / 100) * circumference;
+            const gaugeFill = document.getElementById('gaugeFill');
+            const gaugePercentage = document.getElementById('gaugePercentage');
+            const gaugeLabel = document.getElementById('gaugeLabel');
+            
+            // Color based on risk
+            let color, label;
+            if (percentage >= 70) {
+                color = '#ef4444';
+                label = 'HIGH RISK';
+            } else if (percentage >= 40) {
+                color = '#f59e0b';
+                label = 'MEDIUM RISK';
+            } else {
+                color = '#10b981';
+                label = 'LOW RISK';
+            }
+            
+            gaugeFill.style.stroke = color;
+            gaugeFill.style.strokeDashoffset = offset;
+            gaugePercentage.textContent = percentage.toFixed(1) + '%';
+            gaugeLabel.textContent = label;
+            gaugeLabel.style.color = color;
+        }
+
+        function displayFlaggedFrames(data) {
+            const framesList = document.getElementById('framesList');
+            const framesCount = document.getElementById('framesCount');
+            
+            if (!data.probabilities || data.probabilities.length === 0) {
+                framesList.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6b7280; font-size: 14px;">No frames analyzed</div>';
+                framesCount.textContent = '0 Found';
+                return;
+            }
+            
+            // Get high probability frames (>40%)
+            const flaggedFrames = [];
+            data.probabilities.forEach((prob, idx) => {
+                if (prob > 0.4) {
+                    flaggedFrames.push({
+                        index: data.frame_numbers ? data.frame_numbers[idx] : idx,
+                        probability: prob,
+                        time: data.fps ? (data.frame_numbers ? data.frame_numbers[idx] : idx) / data.fps : 0
+                    });
+                }
+            });
+            
+            // Sort by probability (highest first)
+            flaggedFrames.sort((a, b) => b.probability - a.probability);
+            
+            // Take top frames
+            const topFrames = flaggedFrames.slice(0, 20);
+            
+            framesCount.textContent = `${topFrames.length} Found`;
+            
+            if (topFrames.length === 0) {
+                framesList.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6b7280; font-size: 14px;">No high-risk frames detected</div>';
+                return;
+            }
+            
+            framesList.innerHTML = topFrames.map(frame => {
+                const prob = frame.probability * 100;
+                const color = prob >= 70 ? '#ef4444' : prob >= 40 ? '#f59e0b' : '#10b981';
+                const timeStr = formatTime(frame.time);
+                
+                return `
+                    <div class="frame-item" onclick="seekToFrame(${frame.time})">
+                        <div class="frame-thumbnail">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #1f2937 0%, #374151 100%);"></div>
+                            <div class="play-overlay">▶</div>
+                        </div>
+                        <div class="frame-info">
+                            <div class="frame-number">Frame ${frame.index}</div>
+                            <div class="frame-time">${timeStr}</div>
+                        </div>
+                        <div class="frame-probability">
+                            <div class="probability-bar">
+                                <div class="probability-fill" style="width: ${prob}%; background: ${color};"></div>
+                            </div>
+                            <div class="probability-text" style="color: ${color};">${prob.toFixed(0)}% Probability</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function seekToFrame(time) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (videoPlayer && !videoPlayer.classList.contains('hidden')) {
+                videoPlayer.currentTime = time;
+                videoPlayer.play();
+            }
+        }
+
+        function formatTime(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function resetUI() {
+            document.getElementById('uploadArea').classList.remove('hidden');
+            document.getElementById('videoPlayer').classList.add('hidden');
+            document.getElementById('videoControls').classList.add('hidden');
+            document.getElementById('caseId').textContent = '---';
+            document.getElementById('statusBadge').textContent = 'Ready';
+            document.getElementById('statusBadge').style.background = '#065f46';
+            document.getElementById('reportBtn').classList.add('hidden');
+            document.getElementById('warningBox').classList.add('hidden');
+            
+            // Reset gauge
+            document.getElementById('gaugePercentage').textContent = '-';
+            document.getElementById('gaugeLabel').textContent = 'ANALYZING';
+            document.getElementById('gaugeFill').style.strokeDashoffset = '502.4';
+            document.getElementById('detectionInfo').textContent = 'Upload or capture a video to begin analysis';
+            
+            // Reset frames list
+            document.getElementById('framesList').innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6b7280; font-size: 14px;">No frames analyzed yet</div>';
+            document.getElementById('framesCount').textContent = '0 Found';
+        }
+
+        // Video Controls
+        const videoPlayer = document.getElementById('videoPlayer');
+        
+        videoPlayer.addEventListener('loadedmetadata', () => {
+            document.getElementById('duration').textContent = formatTime(videoPlayer.duration);
+        });
+
+        videoPlayer.addEventListener('timeupdate', () => {
+            const currentTime = videoPlayer.currentTime;
+            const duration = videoPlayer.duration;
+            const percentage = (currentTime / duration) * 100;
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('currentTime').textContent = formatTime(currentTime);
+        });
+
+        videoPlayer.addEventListener('play', () => {
+            document.getElementById('playPauseBtn').textContent = '⏸';
+        });
+
+        videoPlayer.addEventListener('pause', () => {
+            document.getElementById('playPauseBtn').textContent = '▶';
+        });
+
+        function togglePlay() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+            } else {
+                videoPlayer.pause();
+            }
+        }
+
+        function seekVideo(event) {
+            const progressBar = document.getElementById('progressBar');
+            const rect = progressBar.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const percentage = x / rect.width;
+            videoPlayer.currentTime = percentage * videoPlayer.duration;
+        }
+
+        function toggleMute() {
+            videoPlayer.muted = !videoPlayer.muted;
+        }
+
+        function toggleFullscreen() {
+            if (videoPlayer.requestFullscreen) {
+                videoPlayer.requestFullscreen();
+            }
+        }
+
+        function exportReport() {
+            alert('Export functionality would generate a PDF report with all analysis data');
+        }
+
+        function reportToCybercrime() {
+            const confirmed = confirm('This will open the National Cybercrime Reporting Portal. You can report this deepfake video to the authorities.\n\nProceed?');
+            if (confirmed) {
+                window.open('https://cybercrime.gov.in/Webform/Crime_AuthoLogin.aspx', '_blank');
+            }
+        }
+
+        // Mode Switching
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            const uploadBtn = document.querySelector('.mode-btn:first-child');
+            const cameraBtn = document.querySelector('.mode-btn:last-child');
+            
+            if (mode === 'upload') {
+                uploadBtn.classList.add('active');
+                cameraBtn.classList.remove('active');
+                
+                document.getElementById('uploadArea').classList.remove('hidden');
+                document.getElementById('cameraFeed').classList.add('hidden');
+                document.getElementById('cameraControls').classList.add('hidden');
+                document.getElementById('captureProgress').classList.add('hidden');
+                
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    cameraStream = null;
+                }
+                
+                // Reset camera state
+                isCapturing = false;
+                framesCollected = 0;
+                document.getElementById('startCaptureBtn').classList.remove('hidden');
+                document.getElementById('stopCaptureBtn').classList.add('hidden');
+                document.getElementById('analyzeCameraBtn').classList.add('hidden');
+            } else {
+                cameraBtn.classList.add('active');
+                uploadBtn.classList.remove('active');
+                
+                document.getElementById('uploadArea').classList.add('hidden');
+                document.getElementById('videoPlayer').classList.add('hidden');
+                document.getElementById('videoControls').classList.add('hidden');
+                document.getElementById('cameraControls').classList.remove('hidden');
+                
+                startCamera();
+            }
+        }
+
+        async function startCamera() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    } 
+                });
+                const cameraFeed = document.getElementById('cameraFeed');
+                cameraFeed.srcObject = cameraStream;
+                cameraFeed.classList.remove('hidden');
+            } catch (error) {
+                alert('Could not access camera: ' + error.message);
+            }
+        }
+
+        async function startCapture() {
+            framesCollected = 0;
+            isCapturing = true;
+            
+            document.getElementById('startCaptureBtn').classList.add('hidden');
+            document.getElementById('stopCaptureBtn').classList.remove('hidden');
+            document.getElementById('captureProgress').classList.remove('hidden');
+            
+            // Notify server
+            await fetch('/camera/start', { method: 'POST' });
+            
+            // Capture frames
+            const video = document.getElementById('cameraFeed');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            captureInterval = setInterval(async () => {
+                if (!isCapturing || framesCollected >= 300) {
+                    stopCapture();
+                    return;
+                }
+                
+                ctx.drawImage(video, 0, 0);
+                const frameData = canvas.toDataURL('image/jpeg', 0.8);
+                
+                try {
+                    const response = await fetch('/camera/frame', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ frame: frameData })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.face_detected) {
+                        framesCollected = data.frames_collected;
+                        updateCaptureProgress(framesCollected);
+                    }
+                } catch (error) {
+                    console.error('Error sending frame:', error);
+                }
+            }, 100);
+        }
+
+        function updateCaptureProgress(count) {
+            document.getElementById('framesCollected').textContent = count;
+            const percentage = (count / 300) * 100;
+            document.getElementById('captureProgressBar').style.width = percentage + '%';
+            
+            if (count >= 300) {
+                document.getElementById('stopCaptureBtn').classList.add('hidden');
+                document.getElementById('analyzeCameraBtn').classList.remove('hidden');
+            }
+        }
+
+        async function stopCapture() {
+            isCapturing = false;
+            if (captureInterval) {
+                clearInterval(captureInterval);
+                captureInterval = null;
+            }
+            
+            await fetch('/camera/stop', { method: 'POST' });
+            
+            document.getElementById('stopCaptureBtn').classList.add('hidden');
+            
+            if (framesCollected >= 50) {
+                document.getElementById('analyzeCameraBtn').classList.remove('hidden');
+            } else {
+                alert('Not enough frames captured. Please try again.');
+                document.getElementById('startCaptureBtn').classList.remove('hidden');
+                document.getElementById('captureProgress').classList.add('hidden');
+            }
+        }
+
+        async function analyzeCamera() {
+            document.getElementById('analyzeCameraBtn').classList.add('hidden');
+            document.getElementById('captureProgress').classList.add('hidden');
+            document.getElementById('cameraFeed').classList.add('hidden');
+            document.getElementById('loadingSpinner').classList.add('active');
+            
+            const caseId = Math.random().toString(36).substr(2, 9).toUpperCase();
+            document.getElementById('caseId').textContent = caseId;
+            document.getElementById('statusBadge').textContent = 'PROCESSING';
+            
+            try {
+                const response = await fetch('/camera/predict', { method: 'POST' });
+                const data = await response.json();
+                
+                document.getElementById('loadingSpinner').classList.remove('active');
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    resetCameraUI();
+                    return;
+                }
+                
+                displayResults(data);
+                document.getElementById('statusBadge').textContent = 'PROCESSING COMPLETE';
+                
+                // Reset camera for next analysis
+                resetCameraUI();
+                
+            } catch (error) {
+                document.getElementById('loadingSpinner').classList.remove('active');
+                alert('Error analyzing camera feed: ' + error);
+                resetCameraUI();
+            }
+        }
+
+        function resetCameraUI() {
+            framesCollected = 0;
+            document.getElementById('framesCollected').textContent = '0';
+            document.getElementById('captureProgressBar').style.width = '0%';
+            document.getElementById('startCaptureBtn').classList.remove('hidden');
+            document.getElementById('cameraFeed').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
